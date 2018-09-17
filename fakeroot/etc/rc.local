@@ -13,7 +13,7 @@
 
 su -c 'echo "`date` running $0 as $USER from $PWD..." >> /home/pi/boot.log' pi
 
-FILE=/home/pi/noyad/on_pi/setup.sh
+FILE=/home/pi/app/setup.sh
 
 [ -f $FILE ] || FILE=/home/pi/setup.sh
 
