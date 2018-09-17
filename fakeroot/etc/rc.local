@@ -11,12 +11,6 @@
 #
 # By default this script does nothing.
 
-su -c 'echo "`date` running $0 as $USER from $PWD..." >> /home/pi/boot.log' pi
-
-FILE=/home/pi/app/setup.sh
-
-[ -f $FILE ] || FILE=/home/pi/setup.sh
-
-su -c "source $FILE >> /home/pi/boot.log 2>&1" pi
+iptables-restore < /etc/iptables.ipv4.nat
 
 exit 0
