@@ -23,14 +23,21 @@ get_piapi() {
 }
 
 update() {
-    sed -i "s/.*ssid=.*/ssid=${SSID_NAME}/g; s/.*wpa_passphrase.*/wpa_passphrase=${SSID_PASS}/g" fakeroot/etc/hostapd/hostapd.conf
+    sed -i "s/ssid=.*/ssid=${SSID_NAME}/g; s/wpa_passphrase=.*/wpa_passphrase=${SSID_PASS}/g" fakeroot/etc/hostapd/hostapd.conf
 
     echo "$HOST_NAME" > fakeroot/etc/hostname
-    sed -i "s/.*127.0.1.1.*/127.0.1.1 ${HOST_NAME}/g" fakeroot/etc/hosts
+    sed -i "s/127.0.1.1.*/127.0.1.1 ${HOST_NAME}/g" fakeroot/etc/hosts
 
     sudo cp -pRv fakeroot/* /
     cp ap_setup.sh /etc/
     sudo reboot
+}
+
+is_uptodate() {
+    cmp -s fakeroot/etc/version /etc/version \
+        && [ "$SSID_NAME" == "$ssid" ] \
+        && [ "$SSID_PASS" == "$wpa_passphrase" ] \
+        && [ "$HOST_NAME" == "$hostname" ]
 }
 
 on_boot() {
@@ -40,15 +47,29 @@ on_boot() {
         exit $?
     fi
 
-    cmp -s fakeroot/etc/version /etc/version && echo "latest version installed" || update
+    is_uptodate && echo "nothing changed, ap is up to date" || update
 }
 
 once() {
-    which hostapd && echo "dnsmasq already installed" || first_time_setup
+    which hostapd && echo "hostapd already installed" || first_time_setup
+}
+
+get_params() {
+    # get current values
+    if [ -f /etc/hostapd/hostapd.conf ] ; then
+        source <(grep ssid /etc/hostapd/hostapd.conf)
+        source <(grep wpa_passphrase /etc/hostapd/hostapd.conf)
+    fi
+    hostname="$(hostname)"
+
+    echo "ssid_name: $ssid ==> $SSID_NAME"
+    echo "ssid_pass: $wpa_passphrase ==> $SSID_PASS"
+    echo "hostname: $hostname ==> $HOST_NAME"
 }
 
 SSID_NAME=${1-"raspberry-ap"}
 SSID_PASS=${2-"raspberry-ap"}
 HOST_NAME=${3-"raspberry-ap"}
 
+get_params
 once && on_boot
