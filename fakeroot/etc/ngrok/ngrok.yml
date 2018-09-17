@@ -1,0 +1,12 @@
+web_addr: 0.0.0.0:4040
+
+tunnels:
+  web:
+    addr: 8080
+    auth: noyad:noyad
+    bind_tls: true
+    proto: http
+#
+#  ssh:
+#    addr: 22
+#    proto: tcp

@@ -1,0 +1,22 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+su -c 'echo "`date` running $0 as $USER from $PWD..." >> /home/pi/boot.log' pi
+
+FILE=/home/pi/noyad/on_pi/setup.sh
+
+[ -f $FILE ] || FILE=/home/pi/setup.sh
+
+su -c "source $FILE >> /home/pi/boot.log 2>&1" pi
+
+exit 0
