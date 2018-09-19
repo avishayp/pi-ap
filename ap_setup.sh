@@ -2,7 +2,7 @@
 
 # enable access point on raspberry pi
 # usage:
-# ./setup.sh ssid_name ssid_pass hostname
+# ./ap_setup.sh ssid_name ssid_pass hostname
 #
 # default values are all raspberry-ap (security at user's risk)
 
@@ -13,7 +13,8 @@ first_time_setup() {
     sudo apt-get update
     sudo apt-get install -y \
         dnsmasq \
-        hostapd
+        hostapd \
+        nginx
 }
 
 get_piapi() {
@@ -23,6 +24,7 @@ get_piapi() {
 }
 
 update() {
+    echo "updating ap params"
     sed -i "s/ssid=.*/ssid=${SSID_NAME}/g; s/wpa_passphrase=.*/wpa_passphrase=${SSID_PASS}/g" fakeroot/etc/hostapd/hostapd.conf
 
     echo "$HOST_NAME" > fakeroot/etc/hostname
@@ -30,6 +32,7 @@ update() {
 
     sudo cp -pRv fakeroot/* /
     cp ap_setup.sh /etc/
+    echo "rebooting..."
     sudo reboot
 }
 
@@ -43,7 +46,7 @@ is_uptodate() {
 on_boot() {
     if [ ! -d fakeroot ] ; then
         get_piapi
-        source pi-ap/ap_setup.sh "$SSID_NAME" "$SSID_PASS" "$HOST_NAME"
+        ./pi-ap/ap_setup.sh "$SSID_NAME" "$SSID_PASS" "$HOST_NAME"
         exit $?
     fi
 
